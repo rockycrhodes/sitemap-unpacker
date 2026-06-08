@@ -1,0 +1,3 @@
+https://www.example.com/sitemap.xml
+https://www.example.com/sitemap-news.xml
+https://www.example.com/sitemap-articles.xml
