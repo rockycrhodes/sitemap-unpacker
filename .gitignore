@@ -12,3 +12,7 @@ urls_list.csv
 
 # macOS
 .DS_Store
+
+# Belongs in a different repo
+generate_xlsx.py
+psi_batch.py

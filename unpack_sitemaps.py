@@ -1,8 +1,8 @@
 import csv
+import subprocess
 import sys
 import time
 import xml.etree.ElementTree as ET
-import requests
 
 SITEMAP_FILE = "sitemaps.txt"
 OUTPUT_FILE = "urls.csv"
@@ -10,8 +10,23 @@ DELAY = 0.5  # seconds between requests to be polite
 
 NS = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 
-session = requests.Session()
-session.headers.update({"User-Agent": "Mozilla/5.0 (compatible; sitemap-unpacker/1.0)"})
+CURL_HEADERS = [
+    "-H", "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "-H", "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "-H", "Accept-Language: en-US,en;q=0.5",
+    "-H", "Accept-Encoding: gzip, deflate, br",
+]
+
+
+def fetch_url(url, timeout=30):
+    result = subprocess.run(
+        ["curl", "-s", "--compressed", "--max-time", str(timeout), "--fail"] + CURL_HEADERS + [url],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"curl failed (exit {result.returncode}): {result.stderr.strip()}")
+    return result.stdout
 
 
 def parse_urls(xml_text):
@@ -53,14 +68,13 @@ def main():
         for i, sitemap_url in enumerate(sitemaps, 1):
             print(f"[{i}/{len(sitemaps)}] {sitemap_url}", end=" ... ", flush=True)
             try:
-                resp = session.get(sitemap_url, timeout=30)
-                resp.raise_for_status()
-                urls = parse_urls(resp.text)
+                xml_text = fetch_url(sitemap_url)
+                urls = parse_urls(xml_text)
                 for url in urls:
                     writer.writerow([sitemap_url, url])
                 total_urls += len(urls)
                 print(f"{len(urls)} URLs")
-            except requests.RequestException as e:
+            except RuntimeError as e:
                 print(f"ERROR: {e}", file=sys.stderr)
             time.sleep(DELAY)
 
