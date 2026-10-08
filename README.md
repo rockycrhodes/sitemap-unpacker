@@ -7,8 +7,8 @@ Reads a list of sitemap URLs and unpacks them all into a single flat CSV of page
 1. Add sitemap URLs to `sitemaps.txt` — one per line. Optionally prefix each with a label and a tab:
 
 ```
-Example News	https://www.example.com/sitemap/story/update.xml
-Example Herald	https://www.example-herald.com/sitemap/story/update.xml
+Example 	https://www.example.com/sitemap/story/update.xml
+Example 	https://www.example-herald.com/sitemap/story/update.xml
 ```
 
 2. Run:
